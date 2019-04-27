@@ -1,12 +1,10 @@
 package com.alvicom.exercise.service.imp;
 
 import com.alvicom.exercise.domain.Account;
-import com.alvicom.exercise.domain.model.ReportModel;
 import com.alvicom.exercise.domain.model.TransactionModel;
 import com.alvicom.exercise.service.TransactionService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
 import javax.annotation.PostConstruct;
 import java.util.*;
 
@@ -14,7 +12,6 @@ import java.util.*;
 public class TransactionServiceImp implements TransactionService {
 
     private Account account;
-    private ReportModel reportModel;
     private static int countTransactions;
     private Map<String, List<TransactionModel>> reportMap = new HashMap<>();
     private List<Account> accountList = new ArrayList<>();
@@ -28,9 +25,8 @@ public class TransactionServiceImp implements TransactionService {
     }
 
     @Autowired
-    public TransactionServiceImp(Account account, ReportModel reportModel) {
+    public TransactionServiceImp(Account account) {
         this.account = account;
-        this.reportModel = reportModel;
     }
 
     @Override
