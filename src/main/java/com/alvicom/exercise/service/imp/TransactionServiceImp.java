@@ -31,7 +31,7 @@ public class TransactionServiceImp implements TransactionService {
     }
 
     @Override
-    public Map<String, List<TransactionModel>> saveTransaction(TransactionModel transactionModel) {
+    public List<Map<String, List<TransactionModel>>> saveTransaction(TransactionModel transactionModel) {
         Account account = findAccount(transactionModel.getAccountNumber());
         if (Objects.isNull(account)) {
             throw new RuntimeException("Account not found");
@@ -40,7 +40,7 @@ public class TransactionServiceImp implements TransactionService {
         addTransactionToReport(transactionModel, account);
         countTransactions++;
         if (countTransactions % 10 == 0) {
-            return reportMap;
+            return buildReport(reportMap);
         }
         return null;
     }
@@ -93,5 +93,19 @@ public class TransactionServiceImp implements TransactionService {
             transactionModelList.add(transactionModel);
             reportMap.put(transactionModel.getAccountNumber(), transactionModelList);
         }
+    }
+
+    private List<Map<String, List<TransactionModel>>> buildReport(Map<String, List<TransactionModel>> reportMap) {
+        List<Map<String, List<TransactionModel>>> mapList = new ArrayList<>();
+        for (Map.Entry<String, List<TransactionModel>> entry : reportMap.entrySet()) {
+            String key = entry.getKey();
+            List<TransactionModel> value = entry.getValue();
+            Map<String, List<TransactionModel>> modifieadMap = new HashMap<>();
+            Account account = findAccount(key);
+            key += " - Egyenleg: " + account.getBallance() + " " + account.getCurrency();
+            modifieadMap.put(key, value);
+            mapList.add(modifieadMap);
+        }
+        return mapList;
     }
 }

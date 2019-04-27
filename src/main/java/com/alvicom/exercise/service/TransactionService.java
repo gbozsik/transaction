@@ -9,6 +9,6 @@ import java.util.Map;
 @Component
 public interface TransactionService {
 
-    Map<String, List<TransactionModel>> saveTransaction(TransactionModel transactionModel);
+    List<Map<String, List<TransactionModel>>> saveTransaction(TransactionModel transactionModel);
 
 }
