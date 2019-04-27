@@ -3,6 +3,7 @@ package com.alvicom.exercise.service.imp;
 import com.alvicom.exercise.domain.Account;
 import com.alvicom.exercise.domain.model.TransactionModel;
 import com.alvicom.exercise.service.TransactionService;
+import com.sun.xml.internal.bind.v2.model.annotation.RuntimeInlineAnnotationReader;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import javax.annotation.PostConstruct;
@@ -46,6 +47,12 @@ public class TransactionServiceImp implements TransactionService {
 
     private void setBalance(TransactionModel transactionModel, Account account) {
         Integer balance = account.getBallance();
+        if (Objects.isNull(transactionModel.getCurrency())) {
+            throw new RuntimeException("Currency can not be null");
+        }
+        if (transactionModel.getAmmount() == 0) {
+            throw new RuntimeException("Ammount can not be 0");
+        }
         if (currencyiSEqual(account.getCurrency(), transactionModel.getCurrency())) {
             account.setBallance(balance += transactionModel.getAmmount());
         } else {
