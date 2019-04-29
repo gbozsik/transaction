@@ -3,11 +3,17 @@ package com.alvicom.exercise.service.imp;
 import com.alvicom.exercise.domain.Account;
 import com.alvicom.exercise.domain.model.TransactionModel;
 import com.alvicom.exercise.service.TransactionService;
-import com.sun.xml.internal.bind.v2.model.annotation.RuntimeInlineAnnotationReader;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
 import javax.annotation.PostConstruct;
-import java.util.*;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+
 
 @Service
 public class TransactionServiceImp implements TransactionService {
@@ -31,35 +37,36 @@ public class TransactionServiceImp implements TransactionService {
     }
 
     @Override
-    public List<Map<String, List<TransactionModel>>> saveTransaction(TransactionModel transactionModel) {
-        Account account = findAccount(transactionModel.getAccountNumber());
-        if (Objects.isNull(account)) {
-            throw new RuntimeException("Account not found");
+    public void saveTransaction(TransactionModel transactionModel) {
+        if (Objects.isNull(transactionModel.getAccountNumber())) {
+            System.out.println("You have to pass the account number!");
+        } else {
+            Account account = findAccount(transactionModel.getAccountNumber());
+            if (Objects.isNull(account)) {
+                System.out.println("Account number does not exist");
+            } else {
+                setBalance(transactionModel, account);
+                countTransactions++;
+                if (countTransactions % 10 == 0) {
+                    buildReport(reportMap);
+                }
+            }
         }
-        setBalance(transactionModel, account);
-        addTransactionToReport(transactionModel, account);
-        countTransactions++;
-        if (countTransactions % 10 == 0) {
-            return buildReport(reportMap);
-        }
-        return null;
     }
 
     private void setBalance(TransactionModel transactionModel, Account account) {
-        Integer balance = account.getBallance();
-        if (Objects.isNull(transactionModel.getCurrency())) {
-            throw new RuntimeException("Currency can not be null");
-        }
         if (transactionModel.getAmmount() == 0) {
-            throw new RuntimeException("Ammount can not be 0");
-        }
-        if (currencyiSEqual(account.getCurrency(), transactionModel.getCurrency())) {
-            account.setBallance(balance += transactionModel.getAmmount());
-        } else {
-            if (exchangeRateIsNull(transactionModel)) {
-                throw new RuntimeException("If currencies are not the same, Exchange rate can not be null");
-            }
-            account.setBallance(balance += transactionModel.getAmmount() * transactionModel.getAxchangeRate());
+            System.out.println("Amount can not be 0");
+        } else if (exchangeRateIsNull(transactionModel)) {
+            System.out.println("If currencies are not the same, Exchange rate can not be null");
+        } else if (Objects.isNull(transactionModel.getCurrency()) || transactionModel.getCurrency() == "") {
+            System.out.println("You have to pass currency");
+        } else if (currencyIsEqual(account.getCurrency(), transactionModel.getCurrency())) {
+            account.setBallance(account.getBallance() + transactionModel.getAmmount());
+            addTransactionToReport(transactionModel, account);
+        }  else {
+            account.setBallance(account.getBallance() + transactionModel.getAmmount() * transactionModel.getAxchangeRate());
+            addTransactionToReport(transactionModel, account);
         }
     }
 
@@ -72,7 +79,7 @@ public class TransactionServiceImp implements TransactionService {
         return null;
     }
 
-    private boolean currencyiSEqual(String accountCurrency, String transactionCurrency) {
+    private boolean currencyIsEqual(String accountCurrency, String transactionCurrency) {
         if (accountCurrency.equals(transactionCurrency)) {
             return true;
         }
@@ -88,7 +95,7 @@ public class TransactionServiceImp implements TransactionService {
             List<TransactionModel> transactionModelList = reportMap.get(transactionModel.getAccountNumber());
             transactionModelList.add(transactionModel);
             reportMap.put(transactionModel.getAccountNumber(), transactionModelList);
-        }else {
+        } else {
             List<TransactionModel> transactionModelList = new ArrayList<>();
             transactionModelList.add(transactionModel);
             reportMap.put(transactionModel.getAccountNumber(), transactionModelList);
@@ -104,6 +111,8 @@ public class TransactionServiceImp implements TransactionService {
             Account account = findAccount(key);
             key += " - Egyenleg: " + account.getBallance() + " " + account.getCurrency();
             modifieadMap.put(key, value);
+            System.out.println("\n" + key);
+            System.out.println(value.toString());
             mapList.add(modifieadMap);
         }
         return mapList;

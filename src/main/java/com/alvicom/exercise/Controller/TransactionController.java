@@ -25,9 +25,8 @@ public class TransactionController {
     }
 
     @RequestMapping(value = "/saveTransaction")
-    public ResponseEntity<TransactionModel> saveTransaction(@RequestBody TransactionModel transactionModel) {
-        List<Map<String, List<TransactionModel>>> reportMapList = transactionService.saveTransaction(transactionModel);
-        return new ResponseEntity(reportMapList, HttpStatus.OK);
+    public void saveTransaction(@RequestBody TransactionModel transactionModel) {
+        transactionService.saveTransaction(transactionModel);
     }
 
 }
